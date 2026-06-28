@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-result
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Values.result.labels.app }}
+
+spec:
+  replicas: {{ .Values.result.replicaCount }}
+
+  selector:
+    matchLabels:
+      app: {{ .Values.result.selectorLabels.app }}
+
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.result.labels.app }}
+
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}-result
+          image: "{{ .Values.result.image.repository }}:{{ .Values.result.image.tag }}"
+          imagePullPolicy: {{ .Values.result.image.pullPolicy }}
+
+          ports:
+            - name: http-result
+              containerPort: {{ .Values.result.service.port }}
+              protocol: TCP
+          resources:
+            requests:
+              cpu: {{ .Values.result.resources.requests.cpu }}
+              memory: {{ .Values.result.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.result.resources.limits.cpu }}
+              memory: {{ .Values.result.resources.limits.memory }}
+          readinessProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.result.service.port }}
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.result.service.port }}
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            failureThreshold: 3

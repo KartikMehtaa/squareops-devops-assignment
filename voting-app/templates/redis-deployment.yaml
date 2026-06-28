@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-redis
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Values.redis.labels.app }}
+
+spec:
+  replicas: {{ .Values.redis.replicaCount }}
+
+  selector:
+    matchLabels:
+      app: {{ .Values.redis.selectorLabels.app }}
+
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.redis.labels.app }}
+
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}-redis
+          image: "{{ .Values.redis.image.repository }}:{{ .Values.redis.image.tag }}"
+          imagePullPolicy: {{ .Values.redis.image.pullPolicy }}  # ✅ fix: lowercase
+
+          ports:
+            - name: redis
+              containerPort: {{ .Values.redis.service.port }}
+              protocol: TCP
+
+          # ✅ requests bhi add kiye
+          resources:
+            requests:
+              cpu: {{ .Values.redis.resources.requests.cpu }}
+              memory: {{ .Values.redis.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.redis.resources.limits.cpu }}
+              memory: {{ .Values.redis.resources.limits.memory }}
+
+          # ✅ Redis ke liye tcpSocket probe — HTTP nahi hota iske paas
+          readinessProbe:
+            tcpSocket:
+              port: {{ .Values.redis.service.port }}
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 3
+
+          livenessProbe:
+            tcpSocket:
+              port: {{ .Values.redis.service.port }}
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            failureThreshold: 3

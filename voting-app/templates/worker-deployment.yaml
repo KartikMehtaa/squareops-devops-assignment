@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-worker
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Values.worker.labels.app }}
+
+spec:
+  replicas: {{ .Values.worker.replicaCount }}
+
+  selector:
+    matchLabels:
+      app: {{ .Values.worker.selectorLabels.app }}
+
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.worker.labels.app }}
+
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}-worker
+          image: "{{ .Values.worker.image.repository }}:{{ .Values.worker.image.tag }}"
+          imagePullPolicy: {{ .Values.worker.image.pullPolicy }}
+
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-db-secret
+                  key: postgres-user
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-db-secret
+                  key: postgres-password
+            - name: POSTGRES_HOST
+              value: {{ .Release.Name }}-db
+            - name: REDIS_HOST
+              value: {{ .Release.Name }}-redis
+
+          resources:
+            requests:
+              cpu: {{ .Values.worker.resources.requests.cpu }}
+              memory: {{ .Values.worker.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.worker.resources.limits.cpu }}
+              memory: {{ .Values.worker.resources.limits.memory }}
+
+          readinessProbe:
+            exec:
+              command:
+                - pgrep
+                - -f
+                - dotnet
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 3
+
+          livenessProbe:
+            exec:
+              command:
+                - pgrep
+                - -f
+                - dotnet
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            failureThreshold: 3

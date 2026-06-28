@@ -1,0 +1,110 @@
+db:
+  replicaCount: 1
+  labels:
+    app: db
+  selectorLabels:
+    app: db
+  image:
+    repository: postgres
+    tag: "15-alpine"
+    pullPolicy: IfNotPresent
+  service:
+    port: 5432
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+    limits:
+      cpu: "500m"
+      memory: "512Mi"
+  persistence:
+    accessMode: ReadWriteOnce
+    size: 1Gi
+    storageClass: ""
+  secret:
+    user: postgres
+    password: postgres
+
+redis:
+  replicaCount: 1
+  labels:
+    app: redis
+  selectorLabels:
+    app: redis
+  image:
+    repository: redis
+    tag: "alpine"
+    pullPolicy: IfNotPresent
+  service:
+    port: 6379
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "64Mi"
+    limits:
+      cpu: "300m"
+      memory: "128Mi"
+
+result:
+  replicaCount: 1
+  labels:
+    app: result
+  selectorLabels:
+    app: result
+  image:
+    repository: dockersamples/examplevotingapp_result
+    tag: "latest"
+    pullPolicy: IfNotPresent
+  service:
+    port: 80
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+    limits:
+      cpu: "500m"
+      memory: "256Mi"
+
+vote:
+  replicaCount: 1
+  labels:
+    app: vote
+  selectorLabels:
+    app: vote
+  image:
+    repository: kartikmehta/squareops-assessments
+    tag: "latest"
+    pullPolicy: IfNotPresent
+  service:
+    port: 80
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+    limits:
+      cpu: "500m"
+      memory: "256Mi"
+
+worker:
+  replicaCount: 1
+  labels:
+    app: worker
+  selectorLabels:
+    app: worker
+  image:
+    repository: dockersamples/examplevotingapp_worker
+    tag: "latest"
+    pullPolicy: IfNotPresent
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+    limits:
+      cpu: "500m"
+      memory: "256Mi"
+
+ingress:
+  vote:
+    host: vote.local
+  result:
+    host: result.local
