@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-vote
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Values.vote.labels.app }}
+
+spec:
+  replicas: {{ .Values.vote.replicaCount }}
+
+  selector:
+    matchLabels:
+      app: {{ .Values.vote.selectorLabels.app }}
+
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.vote.labels.app }}
+
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}-vote
+          image: "{{ .Values.vote.image.repository }}:{{ .Values.vote.image.tag }}"
+          imagePullPolicy: {{ .Values.vote.image.pullPolicy }}
+
+          ports:
+            - name: http-vote
+              containerPort: {{ .Values.vote.service.port }}
+              protocol: TCP
+
+          # ✅ requests + limits dono
+          resources:
+            requests:
+              cpu: {{ .Values.vote.resources.requests.cpu }}
+              memory: {{ .Values.vote.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.vote.resources.limits.cpu }}
+              memory: {{ .Values.vote.resources.limits.memory }}
+
+          # ✅ Flask app ke liye httpGet probe
+          readinessProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.vote.service.port }}
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 3
+
+          livenessProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.vote.service.port }}
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            failureThreshold: 3
