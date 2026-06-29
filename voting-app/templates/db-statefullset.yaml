@@ -8,7 +8,7 @@ metadata:
 
 spec:
   serviceName: "{{ .Release.Name }}-db"
-  replicas: 1  # Postgres StatefulSet mein always 1 rakhte hain (no multi-master)
+  replicas: 1 
 
   selector:
     matchLabels:
@@ -28,8 +28,6 @@ spec:
           ports:
             - containerPort: {{ .Values.db.service.port }}
               protocol: TCP
-
-          # ✅ Secret se credentials — plain YAML mein password nahi likhte
           env:
             - name: POSTGRES_USER
               valueFrom:
@@ -41,8 +39,6 @@ spec:
                 secretKeyRef:
                   name: {{ .Release.Name }}-db-secret
                   key: postgres-password
-
-          # ✅ requests aur limits dono
           resources:
             requests:
               cpu: {{ .Values.db.resources.requests.cpu }}
@@ -51,13 +47,10 @@ spec:
               cpu: {{ .Values.db.resources.limits.cpu }}
               memory: {{ .Values.db.resources.limits.memory }}
 
-          # ✅ PVC se data mount
           volumeMounts:
             - name: db-storage
               mountPath: /var/lib/postgresql/data
-              subPath: postgres  # subPath zaruri hai Postgres ke liye
-
-          # ✅ readinessProbe — pg_isready check karta hai DB ready hai ya nahi
+              subPath: postgres  
           readinessProbe:
             exec:
               command:
@@ -67,8 +60,6 @@ spec:
             initialDelaySeconds: 10
             periodSeconds: 5
             failureThreshold: 3
-
-          # ✅ livenessProbe — agar DB hang ho jaye toh restart
           livenessProbe:
             exec:
               command:
@@ -78,8 +69,6 @@ spec:
             initialDelaySeconds: 30
             periodSeconds: 10
             failureThreshold: 5
-
-  # ✅ PVC template — pod ke saath automatically create hota hai
   volumeClaimTemplates:
     - metadata:
         name: db-storage

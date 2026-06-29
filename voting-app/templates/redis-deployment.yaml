@@ -28,8 +28,6 @@ spec:
             - name: redis
               containerPort: {{ .Values.redis.service.port }}
               protocol: TCP
-
-          # ✅ requests bhi add kiye
           resources:
             requests:
               cpu: {{ .Values.redis.resources.requests.cpu }}
@@ -37,8 +35,6 @@ spec:
             limits:
               cpu: {{ .Values.redis.resources.limits.cpu }}
               memory: {{ .Values.redis.resources.limits.memory }}
-
-          # ✅ Redis ke liye tcpSocket probe — HTTP nahi hota iske paas
           readinessProbe:
             tcpSocket:
               port: {{ .Values.redis.service.port }}

@@ -5,3 +5,4 @@ obj/
 .vs/
 node_modules/
 voting-app/templates/secretes.yaml
+txt

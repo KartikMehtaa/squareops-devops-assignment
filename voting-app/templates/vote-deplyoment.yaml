@@ -28,8 +28,6 @@ spec:
             - name: http-vote
               containerPort: {{ .Values.vote.service.port }}
               protocol: TCP
-
-          # ✅ requests + limits dono
           resources:
             requests:
               cpu: {{ .Values.vote.resources.requests.cpu }}
@@ -37,8 +35,6 @@ spec:
             limits:
               cpu: {{ .Values.vote.resources.limits.cpu }}
               memory: {{ .Values.vote.resources.limits.memory }}
-
-          # ✅ Flask app ke liye httpGet probe
           readinessProbe:
             httpGet:
               path: /
