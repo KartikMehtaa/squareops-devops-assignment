@@ -36,9 +36,9 @@ spec:
                   name: {{ .Release.Name }}-db-secret
                   key: postgres-password
             - name: POSTGRES_HOST
-              value: {{ .Release.Name }}-db
+              value: db
             - name: REDIS_HOST
-              value: {{ .Release.Name }}-redis
+              value: redis
 
           resources:
             requests:
@@ -48,22 +48,22 @@ spec:
               cpu: {{ .Values.worker.resources.limits.cpu }}
               memory: {{ .Values.worker.resources.limits.memory }}
 
-          readinessProbe:
-            exec:
-              command:
-                - pgrep
-                - -f
-                - dotnet
-            initialDelaySeconds: 10
-            periodSeconds: 5
-            failureThreshold: 3
-
           livenessProbe:
             exec:
               command:
-                - pgrep
-                - -f
-                - dotnet
-            initialDelaySeconds: 20
+                - /bin/sh
+                - -c
+                - "cat /proc/1/cmdline | grep -c dotnet"
+            initialDelaySeconds: 30
             periodSeconds: 10
+            failureThreshold: 3
+
+          readinessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - "cat /proc/1/cmdline | grep -c dotnet"
+            initialDelaySeconds: 15
+            periodSeconds: 5
             failureThreshold: 3
