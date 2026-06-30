@@ -73,7 +73,7 @@ vote:
     app: vote
   image:
     repository: kartikmehta/squareops-assessments
-    tag: "latest"
+    tag: 11
     pullPolicy: IfNotPresent
   service:
     port: 80
