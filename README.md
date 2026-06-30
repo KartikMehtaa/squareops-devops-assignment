@@ -357,7 +357,7 @@ ngrok http 8080
 
 ## Video Walkthrough
 
-[Link here — Loom/YouTube]
+https://youtu.be/JA_9HaiWfz4?si=FT4-bsZcjz969mkX
 
 ---
 
